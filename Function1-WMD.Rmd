@@ -1,0 +1,278 @@
+---
+title: "T1"
+author: "Atom"
+date: "2/6/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+Task1 <- function (table, gene.col, gt.col, flag = c(Alleles, Snps, Carrier)) {
+  
+  library(tidyverse)
+  library(dplyr)
+
+  #Shortened table
+  newTable <- select(table, c(gt.col:ncol(table)))
+  
+  #CellSum function, used for generating 'Top table'
+  CellSum <- function(CurrentCell){
+    a <- c(CurrentCell)
+    a_numbers <- regmatches(a, gregexpr("[[:digit:]]+", a))
+    k <- c(as.numeric(unlist(a_numbers)))
+    return(sum(k))
+  }
+  
+  topTable <- newTable %>%
+    map_df(~ CellSum)
+  
+  #topTable <- matrix(rep(0, times=nrow(newTable)*ncol(newTable)), ncol=ncol(newTable), byrow=TRUE)
+  #topTable0 <- newTable
+  
+  #for (colNum in 1:ncol(topTable0)){
+    #print(colNum)
+    #for (rowNum in 1:nrow(topTable0)){
+      #print(rowNum)
+      #print(CellSum(topTable[rowNum,colNum]))
+      #topTable[rowNum,colNum] <- CellSum(topTable0[rowNum,colNum])
+    #}
+  #}
+  
+   BottomTable <- topTable
+  print(BottomTable)
+  #for (col in 1:ncol(BottomTable)){
+    #for (row in 1:nrow(BottomTable)){
+      #if (BottomTable[row,col] > 1){
+        #BottomTable[row,col] = 1
+      #}
+    #}
+  #}
+  
+  #BottomTable %>%
+    #map_df(~ if_else(.>1, 1, .))
+  #if_else(condition, if result, else result)
+  
+  #Gene col
+  GeneCol <- select(table, c(gene.col))
+  
+  #AllelesRaw
+  AllelesRaw <- cbind(GeneCol, topTable)
+  names(AllelesRaw)[1] <- 'gene'
+  
+  #TableOfAlleles
+  Alleles <- aggregate(. ~ gene, data=AllelesRaw, FUN=sum)
+  
+  #SnpsCarrierRaw
+  SnpsCarrierRaw <- cbind(GeneCol, BottomTable)
+  names(SnpsCarrierRaw)[1] <- 'gene'
+  
+  #TableOfSnps
+  Snps <- aggregate(. ~ gene, data=SnpsCarrierRaw, FUN=sum)
+  
+  #TableOfCarrier
+  Carrier <- Snps
+  for (col in 2:ncol(Carrier)){
+    for (row in 1:nrow(Carrier)){
+      if (Carrier[row,col] > 1){
+        Carrier[row,col] = 1
+      }
+    }
+  }
+  
+  #Return OUTPUT
+    #return(list(Alleles, Snps, Carrier))
+    return(BottomTable)
+
+}
+
+  
+```
+
+```{r}
+input <- tibble(CHROM=1, 
+                POS=2:7, 
+                ID = ".", 
+                GENE=c("g1", "g1", "g2", "g3", "g4","g4"), 
+                s1=c("0/1", "1/0", rep("0/0", 4)),
+                s2=c("1/0", "0/0", "1/0", "0/0", "0/1", "./."),
+                s3=c("0/0", "1/1", "0/0","0/0", "./.", "./."),
+                s4=c(rep("0/0", 3), "0/1", "1/1", "0/1"))
+
+input
+```
+```{r}
+a <- Task1(input,4,5,flag = c(Alleles, Snps, Carrier))
+a %>%
+  map_dbl(~ if_else(.>1, 1, .)) %>%
+  matrix(nrow=)
+
+
+typeof(a) 
+str(a)
+skimr::skim(a)
+
+```
+
+```{r}
+newTable <- select(input, c(5:8))
+
+  topTable <- matrix(rep(0, times=nrow(newTable)*ncol(newTable)), ncol=ncol(newTable), byrow=TRUE)
+  topTable0 <- newTable
+  #Top table
+  for (colNum in 1:ncol(topTable0)){
+    #print(colNum)
+    for (rowNum in 1:nrow(topTable0)){
+      #print(rowNum)
+      #print(CellSum(topTable[rowNum,colNum]))
+      topTable[rowNum,colNum] <- CellSum(topTable0[rowNum,colNum])
+    }
+  }
+  
+  topTable
+```
+
+
+
+```{r}
+  library(tidyverse)
+  library(dplyr)  
+ 
+  #Shortened table 
+  newTable <- select(input, c(5:ncol(input)))
+  newTable
+  
+  #CellSum function, used for generating 'Top table'
+  CellSum <- function(CurrentCell){
+    a <- c(CurrentCell)
+    a_numbers <- regmatches(a, gregexpr("[[:digit:]]+", a))
+    k <- c(as.numeric(unlist(a_numbers)))
+    return(sum(k))
+  }
+  
+  topTable <- matrix(rep(0, times=nrow(newTable)*ncol(newTable)), ncol=ncol(newTable), byrow=TRUE)
+  
+  topTable0 <- newTable
+  
+  #topTable <- newTable
+  #for (colNum in 1:ncol(topTable)){
+    #for (rowNum in 1:nrow(topTable)){
+      #topTable[rowNum,colNum] <- '0'
+    #}
+  #}
+  #for (colNum in 1:4){
+    #names(topTable)[colNum] <- colNum
+    #k <- as.character(colNum)
+    #topTable %>%
+      #mutate(k = sapply(k,toString))
+  #}
+  #topTable
+  
+  topTable <- matrix(rep(0, times=nrow(newTable)*ncol(newTable)), ncol=ncol(newTable), byrow=TRUE)
+  
+  topTable0 <- newTable
+  #Top table
+  for (colNum in 1:ncol(topTable0)){
+    #print(colNum)
+    for (rowNum in 1:nrow(topTable0)){
+      #print(rowNum)
+      #print(CellSum(topTable[rowNum,colNum]))
+      Temp <- CellSum(topTable0[rowNum,colNum])
+      #print(Temp)
+      topTable[row,col] <- Temp
+    }
+  }
+  
+  #topTable
+  
+  output <- input %>%
+    rowwise() %>%
+    mutate(s1 = sum(as.numeric(str_extract_all(s1,"\\d")[[1]])))
+  
+  output %>%
+    group_by(GENE) %>%
+    summarise(sum(s1))
+  
+  sum(as.numeric(str_extract_all(input$s1,"\\d")[[1]]))
+  
+  str_extract_all(input$s1,"\\d")
+  
+  a <- str_extract_all("1/1","\\d")
+  sum(as.numeric(a[[1]]))
+  
+  sum(as.numeric(str_extract_all("1/1","\\d")[[1]]))
+  
+  a <- list(c("a","b","c"), 1:3)
+  a
+  a[[1]][[2]]
+  a[[1]][2]
+  
+  str(a[1])
+  
+  str(a[[1]])
+  
+  typeof(a[1])
+  
+  typeof(a[[1]])
+  
+  
+  
+  sum(as.numeric(str_extract_all("0/1243,54+2", "\\d+")))
+```
+
+
+```{r}
+Task1(input,4,5,Alleles)
+```
+```{r}
+# declare a dataframe
+# different data type have been 
+# indicated for different cols
+data_frame <- data.frame(
+               col1 = as.character(6 : 9),
+               col2 = factor(4 : 7),
+               col3 = letters[2 : 5],
+               col4 = 97 : 100, stringsAsFactors = FALSE)
+  
+print("Original DataFrame")
+print (data_frame)
+  
+# indicating the data type of 
+# each variable
+sapply(data_frame, class)
+  
+# converting character type 
+# column to numeric
+data_frame_col1 <- transform(data_frame,
+                             col1 = as.numeric(col1))
+print("Modified col1 DataFrame")
+print (data_frame_col1)
+  
+# indicating the data type of 
+# each variable
+sapply(data_frame_col1, class)
+  
+# converting character type column
+# to numeric
+data_frame <- transform(data_frame, 
+                             col3 = as.numeric(col3))
+print("Modified col3 DataFrame")
+print (data_frame)
+```
+
+```{r}
+  #create matrix with 4 columns
+topTable1 <- matrix(rep(0, times=nrow(newTable)*ncol(newTable)), ncol=ncol(newTable), byrow=TRUE)
+topTable1
+```
+
+```{r}
+tab <- matrix(rep(2, times=8), ncol=4, byrow=TRUE)
+tab
+```
+
+
+
+
