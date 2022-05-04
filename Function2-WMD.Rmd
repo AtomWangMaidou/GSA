@@ -1,0 +1,204 @@
+---
+title: "Function2-WMD"
+author: "Atom"
+date: "2/23/2022"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+  library(dplyr)
+
+Task1 <- function (table, gene.col, gt.col, flag = c(Alleles, Snps, Carrier)) {
+
+  #Shortened table
+  newTable <- select(table, c(gt.col:ncol(table)))
+  
+  #CellSum function, used for generating 'Top table'
+  CellSum <- function(CurrentCell){
+    a <- c(CurrentCell)
+    a_numbers <- regmatches(a, gregexpr("[[:digit:]]+", a))
+    k <- c(as.numeric(unlist(a_numbers)))
+    return(sum(k))
+  }
+  
+  topTable <- matrix(rep(0, times=nrow(newTable)*ncol(newTable)), ncol=ncol(newTable), byrow=TRUE)
+  topTable0 <- newTable
+  #Top table
+  
+  for (colNum in 1:ncol(topTable0)){
+    #print(colNum)
+    for (rowNum in 1:nrow(topTable0)){
+      #print(rowNum)
+      #print(CellSum(topTable[rowNum,colNum]))
+      topTable[rowNum,colNum] <- CellSum(topTable0[rowNum,colNum])
+    }
+  }
+  
+  BottomTable <- topTable
+  #Botton table
+  #for (col in 1:ncol(BottomTable)){
+    #for (row in 1:nrow(BottomTable)){
+      #if (BottomTable[row,col] > 1){
+        #BottomTable[row,col] = 1
+      #}
+    #}
+  #}
+  
+  BottomTable %>%
+    map_df(~ if_else(.>5, 1, .))
+  #if_else(condition, if result, else result)
+  
+  #Gene col
+  GeneCol <- select(table, c(gene.col))
+  
+  #AllelesRaw
+  AllelesRaw <- cbind(GeneCol, topTable)
+  names(AllelesRaw)[1] <- 'gene'
+  
+  #TableOfAlleles
+  Alleles <- aggregate(. ~ gene, data=AllelesRaw, FUN=sum)
+  
+  #SnpsCarrierRaw
+  SnpsCarrierRaw <- cbind(GeneCol, BottomTable)
+  names(SnpsCarrierRaw)[1] <- 'gene'
+  
+  #TableOfSnps
+  Snps <- aggregate(. ~ gene, data=SnpsCarrierRaw, FUN=sum)
+  
+  #TableOfCarrier
+  Carrier <- Snps
+  for (col in 2:ncol(Carrier)){
+    for (row in 1:nrow(Carrier)){
+      if (Carrier[row,col] > 1){
+        Carrier[row,col] = 1
+      }
+    }
+  }
+  
+  #Return OUTPUT
+    return(list(Carrier))
+
+}
+```
+
+```{r}
+input <- tibble(CHROM=1, 
+                POS=2:7, 
+                ID = ".", 
+                GENE=c("g1", "g1", "g2", "g3", "g4","g4"), 
+                s1=c("0/1", "1/0", rep("0/0", 4)),
+                s2=c("1/0", "0/0", "1/0", "0/0", "0/1", "./."),
+                s3=c("0/0", "1/1", "0/0","0/0", "./.", "./."),
+                s4=c(rep("0/0", 3), "0/1", "1/1", "0/1"))
+```
+
+
+```{r}
+
+```
+
+```{r}
+library(dplyr)
+
+a <- Task1(input,4,5)
+
+a <- as.data.frame(a)
+
+print(a)
+
+#Set <- c("g2", "g3")
+
+#a[2]
+
+#a %>%
+    #filter(gene %in% Set) %>%
+    #summarise(across(2:ncol(a),sum))
+
+#Temp <- filter(a, gene == 'g1')
+#Temp
+
+#names(Temp[1])
+
+#length(Temp)
+
+#for (i in 1:4){
+  #print(i)
+  #finalTable[i,1] <- names(a[i+1])
+  #finalTable[i,2] <- sum(a[i+1])
+#}
+
+#finalTable
+```
+
+
+```{r}
+library(tidyverse)
+library(dplyr)
+
+count_gene_set_variant <- function(Table, GeneSet, Name) {
+  
+  Set <- read_lines(GeneSet)
+  Table <- as.data.frame(Table)
+  
+  # create 'GeneSetTable': trim 'Table' to make sure that only the genes from 'GeneSet' are left.
+  for (i in seq_along(Set)){
+    if (i == 1){
+      GeneName <- Set[i]
+      Temp <- filter(Table, gene == GeneName)
+      GeneSetTable <- Temp
+    } 
+    else{
+      GeneName <- Set[i]
+      Temp <- filter(Table, gene == GeneName)
+      GeneSetTable <- rbind(GeneSetTable, Temp)
+    }
+  }
+  
+  # new table
+  finalTable <- data.frame('sampleID' = rep(c('0'), times = ncol(GeneSetTable)-1),
+                           Name = rep(c(0), times = ncol(GeneSetTable)-1))
+  
+  # fill in the sample names and the gene count
+  for (i in 1:(length(GeneSet)-1)){
+    finalTable[i,1] <- names(GeneSet[i+1])
+    finalTable[i,2] <- sum(GeneSet[i+1])
+  }
+  
+  return(finalTable)
+
+}
+```
+
+```{r}
+gs <- "/Users/mac/Desktop/gs"
+Set <- read_lines(gs)
+
+New <- count_gene_set_variant_refined(a, Set, 'high_expressed_genes')
+New
+```
+
+```{r}
+library(tidyverse)
+library(dplyr)
+
+count_gene_set_variant_refined <- function(Table, GeneSet, Name) {
+  
+  # create 'Table': trim 'Table' to make sure that only the genes from 'GeneSet' are left.
+  variant.per.gene_set.per.sample<- Table %>%
+    filter(gene %in% GeneSet) %>%
+    summarise(across(2:ncol(Table),sum)) %>%
+    pivot_longer( everything(), names_to = "sampleID", values_to = Name)
+
+  return(variant.per.gene_set.per.sample)
+}
+```
+
+
+
+
+
+
+
+
+
