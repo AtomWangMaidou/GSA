@@ -1,0 +1,58 @@
+---
+title: "T1"
+author: "Atom"
+date: "2/6/2022"
+output: html_document
+---
+
+```{r}
+Task1 <- function (table, gene.col, gt.col, flag = c(Alleles, Snps, Carrier)) {
+  
+  library(tidyverse)
+  library(dplyr)
+
+  newTable <- select(table, c(gt.col:ncol(table)))
+  
+  CellSum <- function(CurrentCell){
+    a <- c(CurrentCell)
+    a_numbers <- regmatches(a, gregexpr("[[:digit:]]+", a))
+    k <- c(as.numeric(unlist(a_numbers)))
+    return(sum(k))
+  }
+  
+  topTable <- newTable %>%
+    map_df(~ CellSum)
+  
+  BottomTable <- topTable
+
+  GeneCol <- select(table, c(gene.col))
+  
+  AllelesRaw <- cbind(GeneCol, topTable)
+  names(AllelesRaw)[1] <- 'gene'
+  
+  Alleles <- aggregate(. ~ gene, data=AllelesRaw, FUN=sum)
+  
+  SnpsCarrierRaw <- cbind(GeneCol, BottomTable)
+  names(SnpsCarrierRaw)[1] <- 'gene'
+  
+  Snps <- aggregate(. ~ gene, data=SnpsCarrierRaw, FUN=sum)
+  
+  Carrier <- Snps
+  for (col in 2:ncol(Carrier)){
+    for (row in 1:nrow(Carrier)){
+      if (Carrier[row,col] > 1){
+        Carrier[row,col] = 1
+      }
+    }
+  }
+  
+  return(Alleles, Snps, Carrier)
+
+}
+
+  
+```
+
+
+
+

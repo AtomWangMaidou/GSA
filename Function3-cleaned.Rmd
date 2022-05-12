@@ -1,0 +1,43 @@
+---
+title: "Function3"
+author: "Atom"
+date: "4/1/2022"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+```{r}
+library(tidyverse)
+library(broom)
+
+require(ISLR)
+
+glm_Summary <- function(rawTable, GeneSet, CVnames, Trait, conf.int=FALSE) {
+
+rawTable <- rawTable %>% as_tibble()
+GeneSet <- GeneSet %>% as_tibble() %>% pull(1)
+CVnames <- CVnames %>% as_tibble() %>% pull(1)
+
+glmFunction <- function(inputTable, y){
+  f <- paste0(y,"~ .")
+  glm(formula = as.formula(f), data = inputTable, family = "binomial")
+}
+
+tidy_fun <- function(model, GS_Count, ...) {
+  broom::tidy(model, ...) %>%
+    filter(term == GS_Count)
+}
+
+relevantTable <- rawTable %>% 
+  select(all_of(GeneSet), all_of(CVnames), all_of(Trait)) %>%
+  pivot_longer(cols = all_of(GeneSet), names_to = "category", values_to = "count") %>%
+  group_by(category) %>%
+  nest() %>%
+  mutate(logistic_regression = map(data, ~glmFunction(., Trait))) 
+
+relevantTable <- relevantTable %>%
+  transmute(category, beta = map(logistic_regression, ~tidy_fun(., "count", conf.int = conf.int))) %>%
+  unnest(cols = c(beta))
+
+return (relevantTable)
+}
