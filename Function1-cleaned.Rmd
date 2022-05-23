@@ -6,22 +6,22 @@ output: html_document
 ---
 
 ```{r}
-Task1 <- function (table, gene.col, gt.col, flag = c(Alleles, Snps, Carrier)) {
+Task1 <- function (table, gene.col, gt.col, flag = c("Alleles", "Snps", "Carrier")) {
   
   library(tidyverse)
   library(dplyr)
 
+  flag <- match.arg(flag)
+  
   newTable <- select(table, c(gt.col:ncol(table)))
   
-  CellSum <- function(CurrentCell){
-    a <- c(CurrentCell)
-    a_numbers <- regmatches(a, gregexpr("[[:digit:]]+", a))
-    k <- c(as.numeric(unlist(a_numbers)))
-    return(sum(k))
+  gt2count <- function(genotype){
+    str_extract_all(genotype, "\\d") %>%
+      map_int(~sum(as.integer(.)))
   }
   
   topTable <- newTable %>%
-    map_df(~ CellSum)
+    map_df(gt2count)
   
   BottomTable <- topTable
 
@@ -46,12 +46,39 @@ Task1 <- function (table, gene.col, gt.col, flag = c(Alleles, Snps, Carrier)) {
     }
   }
   
-  return(Alleles, Snps, Carrier)
+  if (flag == "Alleles"){
+    return (Alleles)
+  }
+  else if (flag == "Snps"){
+    return (Snps)}
+  else if (flag == "Carrier"){
+    return (Carrier)
+  }
 
 }
 
   
 ```
+
+
+```{r}
+library(tidyverse)
+library(dplyr)
+
+input <- tibble(CHROM=1, 
+                POS=2:7, 
+                ID = ".", 
+                GENE=c("g1", "g1", "g2", "g3", "g4","g4"), 
+                s1=c("0/1", "1/0", rep("0/0", 4)),
+                s2=c("1/0", "0/0", "1/0", "0/0", "0/1", "./."),
+                s3=c("0/0", "1/1", "0/0","0/0", "./.", "./."),
+                s4=c(rep("0/0", 3), "0/1", "1/1", "0/1"))
+```
+
+```{r}
+Task1(input, 4, 5, "Snps")
+```
+
 
 
 
