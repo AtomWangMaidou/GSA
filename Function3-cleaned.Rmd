@@ -7,37 +7,36 @@ editor_options:
   chunk_output_type: console
 ---
 ```{r}
-library(tidyverse)
-library(broom)
 
-require(ISLR)
+test_gene_set_relevancy <- function(rawTable, GeneSet, CVnames, Trait, conf.int=FALSE) {
 
-glm_Summary <- function(rawTable, GeneSet, CVnames, Trait, conf.int=FALSE) {
-
-rawTable <- rawTable %>% as_tibble()
-GeneSet <- GeneSet %>% as_tibble() %>% pull(1)
-CVnames <- CVnames %>% as_tibble() %>% pull(1)
+rawTable <- rawTable %>% tibble::as_tibble()
+GeneSet <- GeneSet %>% tibble::as_tibble() %>% pull(1)
+CVnames <- CVnames %>% tibble::as_tibble() %>% pull(1)
 
 glmFunction <- function(inputTable, y){
-  f <- paste0(y,"~ .")
-  glm(formula = as.formula(f), data = inputTable, family = "binomial")
+  f <- base::paste0(y,"~ .")
+  stats::glm(formula = as.formula(f), data = inputTable, family = "binomial")
 }
 
 tidy_fun <- function(model, GS_Count, ...) {
   broom::tidy(model, ...) %>%
-    filter(term == GS_Count)
+  dplyr::filter(term == GS_Count)
 }
 
 relevantTable <- rawTable %>% 
-  select(all_of(GeneSet), all_of(CVnames), all_of(Trait)) %>%
-  pivot_longer(cols = all_of(GeneSet), names_to = "category", values_to = "count") %>%
-  group_by(category) %>%
-  nest() %>%
-  mutate(logistic_regression = map(data, ~glmFunction(., Trait))) 
+  dplyr::select(all_of(GeneSet), all_of(CVnames), all_of(Trait)) %>%
+  tidyr::pivot_longer(cols = all_of(GeneSet), names_to = "category", values_to = "count") %>%
+  dplyr::group_by(category) %>%
+  tidylr::nest() %>%
+  dplyr::mutate(logistic_regression = map(data, ~glmFunction(., Trait))) 
 
 relevantTable <- relevantTable %>%
-  transmute(category, beta = map(logistic_regression, ~tidy_fun(., "count", conf.int = conf.int))) %>%
-  unnest(cols = c(beta))
+  dplyr::transmute(category, beta = map(logistic_regression, ~tidy_fun(., "count", conf.int = conf.int))) %>%
+  tidyr::unnest(cols = c(beta))
 
 return (relevantTable)
+
 }
+
+
