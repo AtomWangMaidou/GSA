@@ -6,15 +6,13 @@ output: html_document
 ---
 
 ```{r}
-library(tidyverse)
-library(dplyr)
 
 count_gene_set_variant <- function(Table, GeneSet, Name) {
 
   variant.per.gene_set.per.sample<- Table %>%
-    filter(gene %in% GeneSet) %>%
-    summarise(across(2:ncol(Table),sum)) %>%
-    pivot_longer( everything(), names_to = "sampleID", values_to = Name)
+    dplyr::filter(gene %in% GeneSet) %>%
+    dplyr::summarise(across(2:ncol(Table),sum)) %>%
+    tidyr::pivot_longer( everything(), names_to = "sampleID", values_to = Name)
 
   return(variant.per.gene_set.per.sample)
 }
