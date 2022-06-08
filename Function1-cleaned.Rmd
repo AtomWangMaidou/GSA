@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r}
-Count_mutations_per_gene <- function (table, gene.col, gt.col, flag = c("Alleles", "Snps", "Carrier")) {
+Count_gene_mutations <- function (table, gene.col, gt.col, flag = c("Alleles", "Snps", "Carrier")) {
   
   flag <- match.arg(flag)
   
