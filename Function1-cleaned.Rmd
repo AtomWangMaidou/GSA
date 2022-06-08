@@ -6,36 +6,33 @@ output: html_document
 ---
 
 ```{r}
-Task1 <- function (table, gene.col, gt.col, flag = c("Alleles", "Snps", "Carrier")) {
+Count_mutations_per_gene <- function (table, gene.col, gt.col, flag = c("Alleles", "Snps", "Carrier")) {
   
-  library(tidyverse)
-  library(dplyr)
-
   flag <- match.arg(flag)
   
-  newTable <- select(table, c(gt.col:ncol(table)))
+  newTable <- dplyr::select(table, c(gt.col:ncol(table)))
   
   gt2count <- function(genotype){
-    str_extract_all(genotype, "\\d") %>%
-      map_int(~sum(as.integer(.)))
+    stringr::str_extract_all(genotype, "\\d") %>%
+    purrr::map_int(~sum(as.integer(.)))
   }
   
   topTable <- newTable %>%
-    map_df(gt2count)
+    purrr::map_df(gt2count)
   
   BottomTable <- topTable
 
-  GeneCol <- select(table, c(gene.col))
+  GeneCol <- dplyr::select(table, c(gene.col))
   
-  AllelesRaw <- cbind(GeneCol, topTable)
-  names(AllelesRaw)[1] <- 'gene'
+  AllelesRaw <- base::cbind(GeneCol, topTable)
+  base::names(AllelesRaw)[1] <- 'gene'
   
-  Alleles <- aggregate(. ~ gene, data=AllelesRaw, FUN=sum)
+  Alleles <- stats::aggregate(. ~ gene, data=AllelesRaw, FUN=sum)
   
-  SnpsCarrierRaw <- cbind(GeneCol, BottomTable)
-  names(SnpsCarrierRaw)[1] <- 'gene'
+  SnpsCarrierRaw <- base::cbind(GeneCol, BottomTable)
+  base::names(SnpsCarrierRaw)[1] <- 'gene'
   
-  Snps <- aggregate(. ~ gene, data=SnpsCarrierRaw, FUN=sum)
+  Snps <- stats::aggregate(. ~ gene, data=SnpsCarrierRaw, FUN=sum)
   
   Carrier <- Snps
   for (col in 2:ncol(Carrier)){
@@ -76,7 +73,7 @@ input <- tibble(CHROM=1,
 ```
 
 ```{r}
-Task1(input, 4, 5, "Snps")
+Count_mutations_per_gene (input, 4, 5, "Snps")
 ```
 
 
