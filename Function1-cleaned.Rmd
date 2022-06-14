@@ -6,9 +6,9 @@ output: html_document
 ---
 
 ```{r}
-Count_gene_mutations <- function (table, gene.col, gt.col, flag = c("Alleles", "Snps", "Carrier")) {
+count_gene_mutations <- function (table, gene.col, gt.col, flag = c("Alleles", "Snps", "Carrier")) {
   
-  flag <- match.arg(flag)
+ flag <- match.arg(flag)
   
   newTable <- dplyr::select(table, c(gt.col:ncol(table)))
   
@@ -21,7 +21,8 @@ Count_gene_mutations <- function (table, gene.col, gt.col, flag = c("Alleles", "
     purrr::map_df(gt2count)
   
   BottomTable <- topTable
-
+  BottomTable[BottomTable >=1 ] <- 1
+  
   GeneCol <- dplyr::select(table, c(gene.col))
   
   AllelesRaw <- base::cbind(GeneCol, topTable)
@@ -35,13 +36,7 @@ Count_gene_mutations <- function (table, gene.col, gt.col, flag = c("Alleles", "
   Snps <- stats::aggregate(. ~ gene, data=SnpsCarrierRaw, FUN=sum)
   
   Carrier <- Snps
-  for (col in 2:ncol(Carrier)){
-    for (row in 1:nrow(Carrier)){
-      if (Carrier[row,col] > 1){
-        Carrier[row,col] = 1
-      }
-    }
-  }
+  Carrier[Carrier >=1 ] <- 1
   
   if (flag == "Alleles"){
     return (Alleles)
@@ -73,7 +68,7 @@ input <- tibble(CHROM=1,
 ```
 
 ```{r}
-Count_mutations_per_gene (input, 4, 5, "Snps")
+count_gene_mutations (input, 4, 5, "Carrier")
 ```
 
 
