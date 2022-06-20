@@ -8,8 +8,16 @@ output: html_document
 ```{r}
 count_gene_mutations <- function (table, gene.col, gt.col, flag = c("Alleles", "Snps", "Carrier")) {
   
- flag <- match.arg(flag)
+  if (is.double(gene.col) == FALSE){
+    return ("gene.col needs to be an integer.")
+  }
   
+  if (is.double(gt.col) == FALSE){
+    return ("gt.col needs to be an integer.")
+  }
+  
+  flag <- match.arg(flag)
+ 
   newTable <- dplyr::select(table, c(gt.col:ncol(table)))
   
   gt2count <- function(genotype){
