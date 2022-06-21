@@ -10,16 +10,8 @@ output: html_document
 count_gene_set_variant <- function(Table, GeneSet, Name) {
 
   if (is.tibble(Table) == FALSE){
-    return ("Table needs to be a tibble.")
+    stop("Table needs to be a tibble.")
   } 
-  
-  if (is.character(GeneSet) == FALSE){
-    return ("GeneSet needs to be a character list.")
-  }
-  
-  if (is.character(Name) == FALSE){
-    return ("Name needs to be a character string.")
-  }
   
   variant.per.gene_set.per.sample<- Table %>%
     dplyr::filter(gene %in% GeneSet) %>%

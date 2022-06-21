@@ -8,13 +8,13 @@ output: html_document
 ```{r}
 count_gene_mutations <- function (table, gene.col, gt.col, flag = c("Alleles", "Snps", "Carrier")) {
   
-  if (is.double(gene.col) == FALSE){
-    return ("gene.col needs to be an integer.")
+  if(!(is.numeric(gene.col) && gene.col == round(gene.col))){
+    stop("gene.col needs to be an integer.")
   }
   
-  if (is.double(gt.col) == FALSE){
-    return ("gt.col needs to be an integer.")
-  }
+  if(!(is.numeric(gt.col) && gt.col == round(gt.col))){
+    stop("gene.col needs to be an integer.")
+  } 
   
   flag <- match.arg(flag)
  
@@ -25,8 +25,7 @@ count_gene_mutations <- function (table, gene.col, gt.col, flag = c("Alleles", "
     purrr::map_int(~sum(as.integer(.)))
   }
   
-  topTable <- newTable %>%
-    purrr::map_df(gt2count)
+  topTable <- newTable %>% purrr::map_df(gt2count)
   
   BottomTable <- topTable
   BottomTable[BottomTable >=1 ] <- 1
@@ -73,11 +72,14 @@ input <- tibble(CHROM=1,
                 s2=c("1/0", "0/0", "1/0", "0/0", "0/1", "./."),
                 s3=c("0/0", "1/1", "0/0","0/0", "./.", "./."),
                 s4=c(rep("0/0", 3), "0/1", "1/1", "0/1"))
+
+input
 ```
 
 ```{r}
 count_gene_mutations (input, 4, 5, "Carrier")
 ```
+
 
 
 
