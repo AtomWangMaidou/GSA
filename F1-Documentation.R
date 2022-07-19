@@ -13,11 +13,11 @@
 #' @export
 #'
 #' @examples
-#' count_gene_mutations <- (file.path(R.home("date_table")), 3, 7, Alleles)
+#' count_gene_mutations <- (file.path(R.home("data_table")), 3, 7, Alleles)
 #' 
-#' count_gene_mutations <- (file.path(R.home("date_table")), 3, 7, Snps)
+#' count_gene_mutations <- (file.path(R.home("data_table")), 3, 7, Snps)
 #' 
-#' count_gene_mutations <- (file.path(R.home("date_table")), 3, 7, Carrier)
+#' count_gene_mutations <- (file.path(R.home("data_table")), 3, 7, Carrier)
 
 count_gene_mutations <- function (table, gene.col, gt.col, flag = c("Alleles", "Snps", "Carrier")) {
   
