@@ -12,7 +12,10 @@
 #'
 #' @export
 #'
-#' @examples count_gene_mutations(table, 2, 3, "Alleles")
+#' @examples 
+#' \dontrun{
+#' count_gene_mutations(table, 2, 3, "Alleles")
+#' }
 
 
 count_gene_mutations <- function (table, gene.col, gt.col, flag = c("Alleles", "Snps", "Carrier")) {

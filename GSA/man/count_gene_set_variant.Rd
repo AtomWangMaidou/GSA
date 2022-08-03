@@ -20,5 +20,5 @@ count_gene_set_variant() returns a table specifying the number of mutations in t
 Count gene set variant
 }
 \examples{
-count_gene_set_variant(Table, Set, "high_expressed_genes")
+count_gene_set_variant(table, Set, "high_expressed_genes")
 }

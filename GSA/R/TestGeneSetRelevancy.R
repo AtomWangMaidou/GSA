@@ -32,7 +32,7 @@ test_gene_set_relevancy <- function(rawTable, GeneSet, CVnames, Trait, conf.int=
     dplyr::select(all_of(GeneSet), all_of(CVnames), all_of(Trait)) %>%
     tidyr::pivot_longer(cols = all_of(GeneSet), names_to = "category", values_to = "count") %>%
     dplyr::group_by(category) %>%
-    tidylr::nest() %>%
+    tidyr::nest() %>%
     dplyr::mutate(logistic_regression = map(data, ~glmFunction(., Trait))) 
   
   relevantTable <- relevantTable %>%

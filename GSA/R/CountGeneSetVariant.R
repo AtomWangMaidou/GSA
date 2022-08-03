@@ -8,13 +8,13 @@
 #' @export
 #'
 #' @examples 
-#' count_gene_set_variant(Table, Set, "high_expressed_genes")
+#' count_gene_set_variant(table, Set, "high_expressed_genes")
 
 count_gene_set_variant <- function(Table, GeneSet, Name) {
-  
-  if (is.tibble(Table) == FALSE){
-    stop("Table needs to be a tibble.")
-  } 
+
+  #if (tibble::is_tibble(Table) == FALSE){
+    #stop("Table needs to be a tibble.")
+  #} 
   
   variant.per.gene_set.per.sample<- Table %>%
     dplyr::filter(gene %in% GeneSet) %>%

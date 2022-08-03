@@ -29,5 +29,7 @@ flag = Carrier, A table indicating the presence of mutation in each gene for eac
 Count gene mutations
 }
 \examples{
+\dontrun{
 count_gene_mutations(table, 2, 3, "Alleles")
+}
 }
